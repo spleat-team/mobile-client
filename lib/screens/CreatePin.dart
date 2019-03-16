@@ -25,7 +25,6 @@ class _CreatePinPageState extends State<CreatePinPage> {
   }
 
   static String _encodePicture(List<int> imageBytes) {
-    print("object2");
     return base64Encode(imageBytes);
   }
 
@@ -37,13 +36,11 @@ class _CreatePinPageState extends State<CreatePinPage> {
       int numOfPeople = double.parse(peopleNumController.text).floor();
       print(numOfPeople);
       List<int> imageBytes = await widget.picture.readAsBytes();
-      print("object3");
       String base64Image = await compute(_encodePicture, imageBytes);
-      print("object");
       // send number of people and get pin code
       http
           .post(
-        'http://169.254.148.107:8000/receipts',
+        'http://10.100.102.22:8000/receipts',
         headers: {HttpHeaders.contentTypeHeader: 'application/json'},
         body: JsonEncoder().convert(
             {'picture': base64Image, 'numOfPeople': numOfPeople.toString()}),

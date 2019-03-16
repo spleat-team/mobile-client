@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import './CreatePin.dart';
+import './ReceiptScreen.dart';
+import 'package:http/http.dart' as http;
+import '../classes/receipt.dart';
+import '../classes/dish.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -31,7 +37,7 @@ class _HomePageState extends State<HomePage> {
     });
 
     if (picture != null) {
-      // send req with image to server
+      // send req with image to server - if receipt
 
       // move to next screen
       Navigator.push(
@@ -41,8 +47,25 @@ class _HomePageState extends State<HomePage> {
                     picture: picture,
                   )));
     }
+  }
 
-    print(picture);
+  void _handlePinCodeChanged(String text) async {
+    if (text.length >= 6) {
+      // Send req to server with pincode
+      http.get('http://10.100.102.22:8000/receipts/' + text).then((response) {
+        dynamic c = JsonDecoder().convert(response.body);
+        List<Dish> dishes = Receipt.buildFromJson(c["dishes"]);
+        Receipt r = Receipt(dishes, c["pincode"], c["numOfPeople"],
+            double.parse(c["price"].toString()));
+        // move to next screen
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => ReceiptScreen(
+                      receipt: r,
+                    )));
+      }).catchError((err) => {print("receipt not found")});
+    }
   }
 
   @override
@@ -63,12 +86,7 @@ class _HomePageState extends State<HomePage> {
             child: TextField(
               controller: pinCodeController,
               decoration: InputDecoration(hintText: 'Pin Code'),
-              onChanged: (text) {
-                if (text.length == 6) {
-                  // Send req to server with pincode
-                  print("Got 6 numbers");
-                }
-              },
+              onChanged: _handlePinCodeChanged,
             )),
         Padding(
             padding: EdgeInsets.only(
