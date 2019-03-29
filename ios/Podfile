@@ -32,6 +32,10 @@ def parse_KV_file(file, separator='=')
   return pods_ary
 end
 
+def firebasePods
+  pod 'Firebase/Core'
+end 
+
 target 'Runner' do
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
@@ -58,6 +62,8 @@ target 'Runner' do
     File.symlink(p[:path], symlink)
     pod p[:name], :path => File.join(symlink, 'ios')
   }
+
+  firebasePods
 end
 
 post_install do |installer|

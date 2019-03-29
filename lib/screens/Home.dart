@@ -1,13 +1,12 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import 'package:flutter_signin_button/flutter_signin_button.dart';
+// import 'dart:io';
 import './CreatePin.dart';
 import './ReceiptScreen.dart';
-import 'package:http/http.dart' as http;
 import '../classes/receipt.dart';
-import '../classes/dish.dart';
+import '../utils/auth.dart';
+import '../utils/reciept.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -17,7 +16,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  File _image;
+  // File _image;
   final pinCodeController = TextEditingController();
 
   @override
@@ -32,10 +31,6 @@ class _HomePageState extends State<HomePage> {
       source: ImageSource.camera,
     );
 
-    this.setState(() {
-      _image = picture;
-    });
-
     if (picture != null) {
       // send req with image to server - if receipt
 
@@ -49,14 +44,16 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  void _handleSignout() {
+    AuthService auth = new AuthService();
+    auth.signOut();
+  }
+
   void _handlePinCodeChanged(String text) async {
     if (text.length >= 6) {
       // Send req to server with pincode
-      http.get('http://10.100.102.22:8000/receipts/' + text).then((response) {
-        dynamic c = JsonDecoder().convert(response.body);
-        List<Dish> dishes = Receipt.buildFromJson(c["dishes"]);
-        Receipt r = Receipt(dishes, c["pincode"], c["numOfPeople"],
-            double.parse(c["price"].toString()));
+      Receipt r = await getReceipt(text);
+      if (r != null) {
         // move to next screen
         Navigator.push(
             context,
@@ -64,7 +61,9 @@ class _HomePageState extends State<HomePage> {
                 builder: (context) => ReceiptScreen(
                       receipt: r,
                     )));
-      }).catchError((err) => {print("receipt not found")});
+      } else {
+        print("Reciept not found");
+      }
     }
   }
 
@@ -96,7 +95,17 @@ class _HomePageState extends State<HomePage> {
                 child: Icon(Icons.camera_alt),
                 onPressed: _handleCameraButton,
                 shape: new RoundedRectangleBorder(
-                    borderRadius: new BorderRadius.circular(30.0))))
+                    borderRadius: new BorderRadius.circular(30.0)))),
+        Container(
+            constraints: BoxConstraints(
+              maxWidth: MediaQuery.of(context).size.width / 1.5,
+            ),
+            width: 150.0,
+            child: SignInButton(
+              Buttons.Google,
+              text: "Sign out",
+              onPressed: this._handleSignout,
+            ))
       ]),
     );
   }

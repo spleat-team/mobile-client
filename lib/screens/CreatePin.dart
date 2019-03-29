@@ -3,8 +3,9 @@ import 'dart:io';
 import 'dart:core';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
-import './PinCode.dart';
+import 'package:spleat/classes/receipt.dart';
+import './ReceiptScreen.dart';
+import '../utils/reciept.dart';
 
 class CreatePinPage extends StatefulWidget {
   CreatePinPage({Key key, @required this.picture}) : super(key: key);
@@ -34,29 +35,24 @@ class _CreatePinPageState extends State<CreatePinPage> {
         _isSentToServer = true;
       });
       int numOfPeople = double.parse(peopleNumController.text).floor();
-      print(numOfPeople);
-      List<int> imageBytes = await widget.picture.readAsBytes();
-      String base64Image = await compute(_encodePicture, imageBytes);
+      //List<int> imageBytes = await widget.picture.readAsBytes();
+      // String base64Image = await compute(_encodePicture, imageBytes);
+      String base64Image = "";
       // send number of people and get pin code
-      http
-          .post(
-        'http://10.100.102.22:8000/receipts',
-        headers: {HttpHeaders.contentTypeHeader: 'application/json'},
-        body: JsonEncoder().convert(
-            {'picture': base64Image, 'numOfPeople': numOfPeople.toString()}),
-      )
-          .then((response) {
-        //print(response.body);
-        this.setState(() {
-          _isSentToServer = false;
-        });
+      Receipt r = await sendReceipt(base64Image, numOfPeople);
+      this.setState(() {
+        _isSentToServer = false;
+      });
+      if (r != null) {
         Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => PinCodePage(
-                      pincode: JsonDecoder().convert(response.body)["pincode"],
+                builder: (context) => ReceiptScreen(
+                      receipt: r,
                     )));
-      });
+      } else {
+        print("problem with sending receipt");
+      }
     }
   }
 

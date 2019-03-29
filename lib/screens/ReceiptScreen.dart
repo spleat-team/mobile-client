@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:core';
 import 'package:flutter/foundation.dart';
 import '../classes/receipt.dart';
 import 'package:share/share.dart';
 import '../widgets/DishesList.dart';
+import '../utils/auth.dart';
 
 class ReceiptScreen extends StatefulWidget {
   ReceiptScreen({Key key, @required this.receipt}) : super(key: key);
@@ -26,6 +28,13 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     Share.share(str);
   }
 
+  void _handleFinishMarking() async {
+    AuthService auth = AuthService();
+    FirebaseUser user = await auth.getCurrentUser();
+    String userEmail = user.email;
+    // Update user dishes
+  }
+
   @override
   Widget build(BuildContext context) {
     Receipt rec = widget.receipt;
@@ -42,7 +51,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       body: DishesList(rec.dishes),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.done),
-        onPressed: () {},
+        onPressed: this._handleFinishMarking,
       ),
     );
   }
