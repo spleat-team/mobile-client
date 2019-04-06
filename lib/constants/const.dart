@@ -1,1 +1,1 @@
-const SERVER_URL = "http://10.100.102.13:8000";
+const SERVER_URL = "https://spleat.herokuapp.com";

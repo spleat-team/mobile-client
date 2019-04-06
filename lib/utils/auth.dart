@@ -37,6 +37,7 @@ class AuthService {
   }
 
   void signOut() {
+    _googleSignIn.signOut();
     _auth.signOut();
   }
 }

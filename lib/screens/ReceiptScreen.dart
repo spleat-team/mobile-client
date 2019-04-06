@@ -6,11 +6,13 @@ import '../classes/receipt.dart';
 import 'package:share/share.dart';
 import '../widgets/DishesList.dart';
 import '../utils/auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../widgets/ReceiptBody.dart';
 
 class ReceiptScreen extends StatefulWidget {
-  ReceiptScreen({Key key, @required this.receipt}) : super(key: key);
+  ReceiptScreen({Key key, @required this.pincode}) : super(key: key);
 
-  final Receipt receipt;
+  final String pincode;
 
   @override
   _ReceiptScreenState createState() => _ReceiptScreenState();
@@ -24,7 +26,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
   }
 
   void _handlePinCodeShareToWhatsUp() async {
-    String str = "Spleat pin code: " + widget.receipt.pincode;
+    String str = "Spleat pin code: " + widget.pincode;
     Share.share(str);
   }
 
@@ -37,10 +39,9 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   @override
   Widget build(BuildContext context) {
-    Receipt rec = widget.receipt;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pin Code: " + rec.pincode),
+        title: Text("Pin Code: " + widget.pincode),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.share),
@@ -48,7 +49,24 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           )
         ],
       ),
-      body: DishesList(rec.dishes),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: Firestore.instance
+            .collection('receipts')
+            .document(widget.pincode)
+            .snapshots(),
+        builder:
+            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          if (snapshot.hasError) return new Text('Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return new Text('Loading...');
+            default:
+              final Receipt rec = Receipt.buildReceiptFromJson(
+                  widget.pincode, snapshot.data.data);
+              return ReceiptBody(receipt: rec);
+          }
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.done),
         onPressed: this._handleFinishMarking,

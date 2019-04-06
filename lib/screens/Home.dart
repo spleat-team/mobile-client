@@ -7,6 +7,7 @@ import './ReceiptScreen.dart';
 import '../classes/receipt.dart';
 import '../utils/auth.dart';
 import '../utils/reciept.dart';
+import '../widgets/Template.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -52,41 +53,38 @@ class _HomePageState extends State<HomePage> {
   void _handlePinCodeChanged(String text) async {
     if (text.length >= 6) {
       // Send req to server with pincode
-      Receipt r = await getReceipt(text);
-      if (r != null) {
-        // move to next screen
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ReceiptScreen(
-                      receipt: r,
-                    )));
-      } else {
-        print("Reciept not found");
-      }
+      getReceiptFromFirebase(text).then((docsnap) {
+        if (docsnap.exists) {
+          // move to next screen
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ReceiptScreen(
+                        pincode: text,
+                      )));
+        }
+      }).catchError((err) {
+        print(err);
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-          ListView(physics: NeverScrollableScrollPhysics(), children: <Widget>[
-        Container(
-            height: 350.0,
-            width: MediaQuery.of(context).size.width,
-            child: DecoratedBox(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-              image: AssetImage('assets/images/logo.png'),
-            )))),
+        body: Template(
+      marginTop: 100.0,
+      imageAsset: 'assets/images/logo.png',
+      children: <Widget>[
         Padding(
             padding: EdgeInsets.only(right: 100.0, left: 100.0, bottom: 40.0),
-            child: TextField(
-              controller: pinCodeController,
-              decoration: InputDecoration(hintText: 'Pin Code'),
-              onChanged: _handlePinCodeChanged,
-            )),
+            child: Container(
+                margin: EdgeInsets.only(top: 50.0),
+                child: TextField(
+                  controller: pinCodeController,
+                  decoration: InputDecoration(hintText: 'Pin Code'),
+                  onChanged: _handlePinCodeChanged,
+                ))),
         Padding(
             padding: EdgeInsets.only(
                 right: MediaQuery.of(context).size.width / 2 - 30,
@@ -97,6 +95,7 @@ class _HomePageState extends State<HomePage> {
                 shape: new RoundedRectangleBorder(
                     borderRadius: new BorderRadius.circular(30.0)))),
         Container(
+            margin: EdgeInsets.only(top: 150.0),
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width / 1.5,
             ),
@@ -106,7 +105,7 @@ class _HomePageState extends State<HomePage> {
               text: "Sign out",
               onPressed: this._handleSignout,
             ))
-      ]),
-    );
+      ],
+    ));
   }
 }

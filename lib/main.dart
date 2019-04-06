@@ -29,16 +29,19 @@ class MyHomePage extends StatelessWidget {
 }
 
 Widget _handleCurrentScreen() {
-  return new StreamBuilder<FirebaseUser>(
-      stream: FirebaseAuth.instance.onAuthStateChanged,
-      builder: (BuildContext context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return new Center(child: new CircularProgressIndicator());
-        } else {
-          if (snapshot.hasData) {
-            return new HomePage();
-          }
-          return new LoginPage();
-        }
-      });
+  return Scaffold(
+      body: new StreamBuilder<FirebaseUser>(
+          stream: FirebaseAuth.instance.onAuthStateChanged,
+          builder: (BuildContext context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return new Center(child: new CircularProgressIndicator());
+            } else {
+              if (snapshot.hasData) {
+                return new HomePage();
+              }
+
+              // return login
+              return new LoginPage();
+            }
+          }));
 }

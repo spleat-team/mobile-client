@@ -33,7 +33,9 @@ def parse_KV_file(file, separator='=')
 end
 
 def firebasePods
-  pod 'Firebase/Core'
+  pod 'Firebase'
+  #pod 'Firebase/Auth'
+  #pod 'Firebase/Firestore'
 end 
 
 target 'Runner' do

@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:core';
@@ -25,35 +28,43 @@ class _CreatePinPageState extends State<CreatePinPage> {
     super.dispose();
   }
 
-  static String _encodePicture(List<int> imageBytes) {
-    return base64Encode(imageBytes);
-  }
-
   void _handleGetPinCode() async {
     if (peopleNumController.text != "") {
       this.setState(() {
         _isSentToServer = true;
       });
       int numOfPeople = double.parse(peopleNumController.text).floor();
-      //List<int> imageBytes = await widget.picture.readAsBytes();
-      // String base64Image = await compute(_encodePicture, imageBytes);
-      String base64Image = "";
-      // send number of people and get pin code
-      Receipt r = await sendReceipt(base64Image, numOfPeople);
+      String pincode = _generatePinCode();
+      // Get dishes from receiptPredictor
+      Firestore.instance.collection("receipts").document(pincode).setData({
+        'numOfPeople': numOfPeople,
+        'dishes': [
+          {'amount': 3, 'name': 'מנה טעימה', 'price': 50, 'userIds': []}
+        ],
+        'price': 150,
+        'users': []
+      });
       this.setState(() {
         _isSentToServer = false;
       });
-      if (r != null) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ReceiptScreen(
-                      receipt: r,
-                    )));
-      } else {
-        print("problem with sending receipt");
-      }
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ReceiptScreen(
+                    pincode: pincode,
+                  )));
     }
+  }
+
+  String _generatePinCode() {
+    const String salt_chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    List<String> list = new List();
+    Random rnd = new Random();
+    for (int i = 0; i < 4; i++) {
+      int index = rnd.nextInt(salt_chars.length);
+      list.add(salt_chars[index]);
+    }
+    return list.join();
   }
 
   @override

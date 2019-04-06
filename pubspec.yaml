@@ -26,6 +26,7 @@ dependencies:
   google_sign_in: ^3.2.2
   rxdart: ^0.21.0
   flutter_signin_button: ^0.2.8
+  cloud_firestore: 0.9.7
 
 dev_dependencies:
   flutter_test:

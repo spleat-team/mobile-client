@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import '../utils/auth.dart';
+import '../widgets/Template.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({Key key}) : super(key: key);
@@ -24,22 +25,16 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body:
-          ListView(physics: NeverScrollableScrollPhysics(), children: <Widget>[
-        Container(
-            height: 350.0,
-            width: MediaQuery.of(context).size.width,
-            child: DecoratedBox(
-                decoration: BoxDecoration(
-                    image: DecorationImage(
-              image: AssetImage('assets/images/logo.png'),
-            )))),
-        SignInButton(
-          Buttons.Google,
-          text: "Sign up with Google",
-          onPressed: this._handleSignIn,
-        )
-      ]),
+      body: Template(
+          marginTop: 100.0,
+          imageAsset: 'assets/images/logo.png',
+          children: <Widget>[
+            SignInButton(
+              Buttons.Google,
+              text: "Sign up with Google",
+              onPressed: this._handleSignIn,
+            )
+          ]),
     );
   }
 }
