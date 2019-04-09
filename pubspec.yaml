@@ -27,6 +27,9 @@ dependencies:
   rxdart: ^0.21.0
   flutter_signin_button: ^0.2.8
   cloud_firestore: 0.9.7
+  dio: ^2.1.0
+  intro_slider: ^1.2.0
+  intro_views_flutter: '^2.6.0'
 
 dev_dependencies:
   flutter_test:
@@ -42,7 +45,10 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/
+    - assets/
+    - assets/intro/scan.png
+    - assets/intro/select.png
+    - assets/intro/done.png
   # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg
