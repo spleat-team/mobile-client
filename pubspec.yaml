@@ -30,6 +30,7 @@ dependencies:
   dio: ^2.1.0
   intro_slider: ^1.2.0
   intro_views_flutter: '^2.6.0'
+  shared_preferences: ^0.4.2
 
 dev_dependencies:
   flutter_test:
@@ -45,7 +46,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/
+    - assets/images/logo.png
     - assets/intro/scan.png
     - assets/intro/select.png
     - assets/intro/done.png

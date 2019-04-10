@@ -4,12 +4,13 @@ import './screens/Home.dart';
 import './screens/Login.dart';
 import 'package:intro_views_flutter/Models/page_view_model.dart';
 import 'package:intro_views_flutter/intro_views_flutter.dart';
+import './utils/prefs.dart';
+
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
-  //making list of pages needed to pass in IntroViewsFlutter constructor.
-  final pages = [
+//making list of pages needed to pass in IntroViewsFlutter constructor.
+final introPages = [
     PageViewModel(
         pageColor: const Color.fromRGBO(22, 168, 181, 0.5),
         bubble: Image.asset('assets/intro/scan.png'),
@@ -56,6 +57,8 @@ class MyApp extends StatelessWidget {
     ),
   ];
 
+class MyApp extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -63,28 +66,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        //home: _handleCurrentScreen());
-        home: Builder(
-          builder: (context) =>
-              IntroViewsFlutter(
-                pages,
-                showNextButton: true,
-                showBackButton: true,
-                fullTransition: 250,
-                onTapDoneButton: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => _handleCurrentScreen()
-                    ),
-                  );
-                },
-                pageButtonTextStyles: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                ),
-              ), //IntroViewsFlutter
-        ) //Builder
+        home: _handleCurrentScreen()
+        // home: 
     );
   }
 }
@@ -101,6 +84,24 @@ class MyHomePage extends StatelessWidget {
 }
 
 Widget _handleCurrentScreen() {
+  
+  return new FutureBuilder<bool>(
+    future: getIfUserPassedIntro(),
+    builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+      switch (snapshot.connectionState) {
+        case ConnectionState.waiting: return new Text('Loading...');
+        default:
+          if (snapshot.hasError)
+            return new Text('Error: ${snapshot.error}');
+          else if (snapshot.hasData) {
+            return snapshot.data ? showHomeScreen() : showIntro();
+          }
+      }
+    }
+  );
+}
+
+Widget showHomeScreen() {
   return Scaffold(
       body: new StreamBuilder<FirebaseUser>(
           stream: FirebaseAuth.instance.onAuthStateChanged,
@@ -115,5 +116,33 @@ Widget _handleCurrentScreen() {
               // return login
               return new LoginPage();
             }
-          }));
+          } 
+      )
+  );
+}
+
+Widget showIntro() {
+  print("building intro");
+  return Builder(
+        builder: (context) =>
+            IntroViewsFlutter(
+              introPages,
+              showNextButton: true,
+              showBackButton: true,
+              fullTransition: 250,
+              onTapDoneButton: () {
+                setIfUserPassedIntro(true);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => _handleCurrentScreen()
+                  ),
+                );
+              },
+              pageButtonTextStyles: TextStyle(
+                color: Colors.white,
+                fontSize: 18.0,
+              ),
+            ),
+      );
 }
